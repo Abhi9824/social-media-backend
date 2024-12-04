@@ -55,7 +55,7 @@ app.get("/", (req, res) => {
 
 // routes for login and signup
 
-app.post("/signup", async (req, res) => {
+app.post("/api/user/signup", async (req, res) => {
   const userData = req.body;
   if (
     !userData.name ||
@@ -90,7 +90,7 @@ app.post("/signup", async (req, res) => {
   }
 });
 
-app.post("/login", async (req, res) => {
+app.post("/api/user/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -137,6 +137,7 @@ app.get("/api/users", async (req, res) => {
 //get user by Id
 app.get("/users/:userId", async (req, res) => {
   try {
+    const { userId } = req.params;
     const user = await getUserById(userId);
     if (user) {
       res.status(200).json({ message: "User data fetched successfully", user });
