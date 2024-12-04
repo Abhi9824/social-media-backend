@@ -1,9 +1,8 @@
 const cloudinary = require("cloudinary");
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 const { Post } = require("../models/post.models.js");
 const { User } = require("../models/user.models.js");
-const { urlencoded } = require("express");
 
 const signUp = async (userData) => {
   const { name, username, password, email } = userData;
