@@ -135,9 +135,9 @@ app.get("/api/users", async (req, res) => {
 });
 
 //get user by Id
-app.get("/users/:userId", async (req, res) => {
+app.get("/profile", verifyAuth, async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { userId } = req.user;
     const user = await getUserById(userId);
     if (user) {
       res.status(200).json({ message: "User data fetched successfully", user });
