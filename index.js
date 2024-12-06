@@ -55,7 +55,7 @@ app.get("/", (req, res) => {
 
 // routes for login and signup
 
-app.post("/api/user/signup", async (req, res) => {
+app.post("/user/signup", async (req, res) => {
   const userData = req.body;
   if (
     !userData.name ||
@@ -90,7 +90,7 @@ app.post("/api/user/signup", async (req, res) => {
   }
 });
 
-app.post("/api/user/login", async (req, res) => {
+app.post("/user/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
@@ -121,7 +121,7 @@ app.post("/api/user/login", async (req, res) => {
 });
 
 //get all users
-app.get("/api/users", async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     const users = await getAllUser();
     if (users) {
@@ -135,7 +135,7 @@ app.get("/api/users", async (req, res) => {
 });
 
 //get user by Id
-app.get("/profile", verifyAuth, async (req, res) => {
+app.get("/user/profile", verifyAuth, async (req, res) => {
   try {
     const { userId } = req.user;
     const user = await getUserById(userId);
@@ -150,7 +150,7 @@ app.get("/profile", verifyAuth, async (req, res) => {
 });
 
 //routes for following users
-app.post("/api/user/follow/:followerUserId", verifyAuth, async (req, res) => {
+app.post("/user/follow/:followerUserId", verifyAuth, async (req, res) => {
   try {
     const { userId } = req.user;
     const { followerUserId } = req.params;
@@ -167,7 +167,7 @@ app.post("/api/user/follow/:followerUserId", verifyAuth, async (req, res) => {
 });
 
 //routes for unfollow users
-app.post("/api/user/unfollow/:follwerUserId", verifyAuth, async (req, res) => {
+app.post("/user/unfollow/:follwerUserId", verifyAuth, async (req, res) => {
   try {
     const { userId } = req.user;
     const { follwerUserId } = req.params;
@@ -185,7 +185,7 @@ app.post("/api/user/unfollow/:follwerUserId", verifyAuth, async (req, res) => {
 
 //change avatar
 app.post(
-  "/api/user/change-avatar",
+  "/user/change-avatar",
   verifyAuth,
   upload.single("image"),
   async (req, res) => {
@@ -213,7 +213,7 @@ app.post(
 //routes apis for post
 
 //get all post
-app.get("/api/user/post", verifyAuth, async (req, res) => {
+app.get("/user/post", verifyAuth, async (req, res) => {
   try {
     const { userId } = req.user;
     const post = await getAllPost(userId);
@@ -228,7 +228,7 @@ app.get("/api/user/post", verifyAuth, async (req, res) => {
 });
 
 //get postById
-app.get("/api/user/post/:postId", verifyAuth, async (req, res) => {
+app.get("/user/post/:postId", verifyAuth, async (req, res) => {
   const { postId } = req.params;
   const { userId } = req.user;
   try {
@@ -245,7 +245,7 @@ app.get("/api/user/post/:postId", verifyAuth, async (req, res) => {
 
 //add post
 app.post(
-  "/api/user/post",
+  "/user/post",
   verifyAuth,
   upload.array("media", 5),
   async (req, res) => {
@@ -290,7 +290,7 @@ app.post(
 
 //update post
 app.put(
-  "/api/user/post/edit/:postId",
+  "/user/post/edit/:postId",
   verifyAuth,
   upload.array("media", 5),
   async (req, res) => {
@@ -338,7 +338,7 @@ app.put(
 );
 
 //delete post
-app.delete("/api/user/posts/:postId", verifyAuth, async (req, res) => {
+app.delete("/user/posts/:postId", verifyAuth, async (req, res) => {
   const { postId } = req.params;
   const { userId } = req.user;
   try {
@@ -356,7 +356,7 @@ app.delete("/api/user/posts/:postId", verifyAuth, async (req, res) => {
 });
 
 //liking a post
-app.post("/api/user/post/like/:postId", verifyAuth, async (req, res) => {
+app.post("/user/post/like/:postId", verifyAuth, async (req, res) => {
   const { userId } = req.user;
   const { postId } = req.params;
   try {
@@ -371,7 +371,7 @@ app.post("/api/user/post/like/:postId", verifyAuth, async (req, res) => {
   }
 });
 
-app.post("/api/user/post/dislike/:postId", verifyAuth, async (req, res) => {
+app.post("/user/post/dislike/:postId", verifyAuth, async (req, res) => {
   const { userId } = req.user;
   const { postId } = req.params;
   try {
@@ -387,7 +387,7 @@ app.post("/api/user/post/dislike/:postId", verifyAuth, async (req, res) => {
 });
 
 //adding bookmark to users
-app.post("/api/user/bookmark/:postId", verifyAuth, async (req, res) => {
+app.post("/user/bookmark/:postId", verifyAuth, async (req, res) => {
   const { userId } = req.user;
   const { postId } = req.params;
   try {
@@ -405,30 +405,24 @@ app.post("/api/user/bookmark/:postId", verifyAuth, async (req, res) => {
 });
 
 //remove from bookmark
-app.delete(
-  "/api/user/remove-bookmark/:postId",
-  verifyAuth,
-  async (req, res) => {
-    try {
-      const { userId } = req.user;
-      const { postId } = req.params;
+app.delete("/user/remove-bookmark/:postId", verifyAuth, async (req, res) => {
+  try {
+    const { userId } = req.user;
+    const { postId } = req.params;
 
-      const post = await removeBookmark(userId, postId);
-      if (post) {
-        res
-          .status(200)
-          .json({ message: "Bookmark removed successfully.", post });
-      } else {
-        res.status(404).json({ message: "Failed to remove the Bookmark." });
-      }
-    } catch (error) {
-      res.status(500).json({ error: "Internal Service Error" });
+    const post = await removeBookmark(userId, postId);
+    if (post) {
+      res.status(200).json({ message: "Bookmark removed successfully.", post });
+    } else {
+      res.status(404).json({ message: "Failed to remove the Bookmark." });
     }
+  } catch (error) {
+    res.status(500).json({ error: "Internal Service Error" });
   }
-);
+});
 
 //get all bookmark
-app.get("/api/user/bookmarks", verifyAuth, async (req, res) => {
+app.get("/user/bookmarks", verifyAuth, async (req, res) => {
   try {
     const { userId } = req.user;
 
@@ -446,7 +440,7 @@ app.get("/api/user/bookmarks", verifyAuth, async (req, res) => {
 });
 
 //add comment routes
-app.post("/api/user/comment/:postId", verifyAuth, async (req, res) => {
+app.post("/user/comment/:postId", verifyAuth, async (req, res) => {
   try {
     const { userId } = req.user;
     const { postId } = req.params;
@@ -467,7 +461,7 @@ app.post("/api/user/comment/:postId", verifyAuth, async (req, res) => {
 
 //remove comment
 app.delete(
-  "/api/user/:postId/delete-comment/:commentId",
+  "/user/:postId/delete-comment/:commentId",
   verifyAuth,
   async (req, res) => {
     try {
