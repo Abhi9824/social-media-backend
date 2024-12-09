@@ -10,7 +10,7 @@ const addPost = async (userId, postData) => {
       const post = {
         caption: postData.caption,
         media: postData.media,
-        author: user,
+        author: userId,
         // author: postData.author,
       };
 
@@ -65,9 +65,7 @@ const getPostById = async (userId, postId) => {
 const updatePostById = async (postId, dataToUpdate, userId) => {
   try {
     const post = await Post.findById(postId);
-    if (!post) {
-      return null; // Post not found
-    }
+    if (!post) throw new Error("Post not found");
 
     // Ensure the logged-in user is the author
     if (post.author.toString() !== userId) {
@@ -95,9 +93,15 @@ const likePost = async (userId, postId) => {
         .populate("likes", "username ")
         .populate("author", "username")
         .populate("comments.commentedBy", "username media");
-      post.likes.push(user);
-      await post.save();
 
+      if (!post) {
+        throw new Error("Post not found");
+      }
+
+      if (!post.likes.includes(userId)) {
+        post.likes.push(user);
+        await post.save();
+      }
       return post;
     }
   } catch (error) {
@@ -195,13 +199,13 @@ const removeComment = async (userId, postId, commentId) => {
 
       post.comments = updatedComments;
       await post.save();
-
-      return post;
+      return { updatedComments: post.comments };
+      // return post;
     } else {
       console.log("No authorized to delete the comment");
     }
   } catch (error) {
-    console.group("Erro deleting the comment");
+    console.group("Error deleting the comment");
   }
 };
 

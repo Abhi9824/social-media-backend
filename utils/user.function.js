@@ -21,6 +21,7 @@ const signUp = async (userData) => {
     return savedUser;
   } catch (error) {
     console.log("Error creating a new user", error);
+    throw new Error("User creation failed");
   }
 };
 
@@ -39,6 +40,7 @@ const login = async (user, password) => {
       return user;
     } else {
       console.log("Incorrect password");
+      return null;
     }
   } catch (error) {
     console.error("Error logging in :-", error);

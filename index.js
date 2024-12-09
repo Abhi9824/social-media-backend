@@ -85,16 +85,17 @@ app.post("/user/signup", async (req, res) => {
         res.status(400).json({ message: "SignUp failed" });
       }
     } catch (error) {
-      res.status(500).json({ message: "Internal Server Error" });
+      console.error("Error during signup:", error);
+      res.status(500).json({ message: "Internal Server Error", error });
     }
   }
 });
 
 app.post("/user/login", async (req, res) => {
-  const { username, password } = req.body;
+  const { email, password } = req.body;
 
   try {
-    const user = await User.findOne({ username })
+    const user = await User.findOne({ email: email })
       .populate("followers", "username")
       .populate("following", "username")
       .populate("posts");
@@ -140,7 +141,9 @@ app.get("/user/profile", verifyAuth, async (req, res) => {
     const { userId } = req.user;
     const user = await getUserById(userId);
     if (user) {
-      res.status(200).json({ message: "User data fetched successfully", user });
+      res
+        .status(200)
+        .json({ message: "User data fetched successfully", profile: user });
     } else {
       res.status(404).json({ message: "Failed to fetch the user" });
     }
@@ -338,7 +341,7 @@ app.put(
 );
 
 //delete post
-app.delete("/user/posts/:postId", verifyAuth, async (req, res) => {
+app.delete("/user/post/:postId", verifyAuth, async (req, res) => {
   const { postId } = req.params;
   const { userId } = req.user;
   try {
