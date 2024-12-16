@@ -76,7 +76,7 @@ const addBookmark = async (userId, postId) => {
     await user.save();
     return post;
   } catch (error) {
-    throw error;
+    throw new Error("Error adding bookmark", error);
   }
 };
 

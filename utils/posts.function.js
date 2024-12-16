@@ -10,13 +10,13 @@ const addPost = async (userId, postData) => {
       const post = {
         caption: postData.caption,
         media: postData.media,
-        author: userId,
+        author: user._id,
         // author: postData.author,
       };
 
       const newPost = new Post(post);
       await newPost.save();
-      await newPost.populate("author", "username media");
+      await newPost.populate("author", "username image");
 
       user.posts.push(newPost);
       await user.save();
@@ -33,12 +33,13 @@ const getAllPost = async (userId) => {
     if (!user) {
       throw new Error("User not found");
     } else {
-      const allPosts = await Post.find()
+      const posts = await Post.find()
         .populate("author", "username media")
+        .populate("author", "username image")
         .populate("likes", "username")
         .populate("comments.commentedBy", "username media");
 
-      return allPosts;
+      return posts;
     }
   } catch (error) {
     throw error;

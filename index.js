@@ -13,6 +13,23 @@ app.use(express.json());
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const cors = require("cors");
+
+// const allowedOrigins = ["http://localhost:3000"];
+
+// const corsOptions = {
+//   origin: (origin, callback) => {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   credentials: true,
+//   optionSuccessStatus: 200,
+// };
+
+// app.use(cors(corsOptions));
+
 const corsOptions = {
   origin: "*",
   credentials: true,
@@ -128,7 +145,7 @@ app.get("/users", async (req, res) => {
     if (users) {
       res.status(200).json({ message: "Got all users successgully", users });
     } else {
-      res.status(404).json({ message: "Failed to load alll users" });
+      res.status(404).json({ message: "Failed to load all users" });
     }
   } catch (error) {
     res.status(500).json({ error: "Internal Server Issue", error });
@@ -261,7 +278,7 @@ app.post(
         return res.status(400).json({ message: "No files uploaded" });
       }
 
-      //upload files to cludinary
+      //upload files to cloudinary
       const mediaArray = await Promise.all(
         files.map(async (file) => {
           const cloudResponse = await uploadOnCloudinary(file.path);
@@ -273,7 +290,7 @@ app.post(
       );
       const postData = {
         caption,
-        media: mediaArray,
+        media: mediaArray || null,
       };
 
       const newPost = await addPost(userId, postData);
@@ -374,7 +391,7 @@ app.post("/user/post/like/:postId", verifyAuth, async (req, res) => {
   }
 });
 
-app.post("/user/post/dislike/:postId", verifyAuth, async (req, res) => {
+app.post("/user/post/unlike/:postId", verifyAuth, async (req, res) => {
   const { userId } = req.user;
   const { postId } = req.params;
   try {
@@ -394,11 +411,11 @@ app.post("/user/bookmark/:postId", verifyAuth, async (req, res) => {
   const { userId } = req.user;
   const { postId } = req.params;
   try {
-    const bookmarkPost = await addBookmark(userId, postId);
-    if (bookmarkPost) {
+    const bookmarks = await addBookmark(userId, postId);
+    if (bookmarks) {
       res
         .status(200)
-        .json({ message: "Added to bookmark successfully", bookmarkPost });
+        .json({ message: "Added to bookmark successfully", bookmarks });
     } else {
       res.status(404).json;
     }
@@ -429,11 +446,9 @@ app.get("/user/bookmarks", verifyAuth, async (req, res) => {
   try {
     const { userId } = req.user;
 
-    const allBookmarkPosts = await getAllBookmarks(userId);
-    if (allBookmarkPosts) {
-      res
-        .status(200)
-        .json({ message: "All saved bookmarks", allBookmarkPosts });
+    const bookmarks = await getAllBookmarks(userId);
+    if (bookmarks) {
+      res.status(200).json({ message: "All saved bookmarks", bookmarks });
     } else {
       res.status(404).json({ message: "Failed to load all bookmarks." });
     }
