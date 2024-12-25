@@ -13,25 +13,8 @@ app.use(express.json());
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const cors = require("cors");
-
-// const allowedOrigins = ["http://localhost:3000"];
-
-// const corsOptions = {
-//   origin: (origin, callback) => {
-//     if (!origin || allowedOrigins.includes(origin)) {
-//       callback(null, true);
-//     } else {
-//       callback(new Error("Not allowed by CORS"));
-//     }
-//   },
-//   credentials: true,
-//   optionSuccessStatus: 200,
-// };
-
-// app.use(cors(corsOptions));
-
 const corsOptions = {
-  origin: "*",
+  origin: "http://localhost:3000",
   credentials: true,
   optionSuccessStatus: 200,
 };
@@ -66,7 +49,6 @@ const {
   login,
   updateProfile,
 } = require("./utils/user.function");
-const { profile } = require("console");
 
 app.get("/", (req, res) => {
   res.send("Social Media Application");
