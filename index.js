@@ -64,7 +64,9 @@ const {
   getAllUser,
   getUserById,
   login,
+  updateProfile,
 } = require("./utils/user.function");
+const { profile } = require("console");
 
 app.get("/", (req, res) => {
   res.send("Social Media Application");
@@ -143,7 +145,9 @@ app.get("/users", async (req, res) => {
   try {
     const users = await getAllUser();
     if (users) {
-      res.status(200).json({ message: "Got all users successgully", users });
+      res
+        .status(200)
+        .json({ message: "Got all users successfully", users: users });
     } else {
       res.status(404).json({ message: "Failed to load all users" });
     }
@@ -169,15 +173,41 @@ app.get("/user/profile", verifyAuth, async (req, res) => {
   }
 });
 
+app.put("/user/profile/update", verifyAuth, async (req, res) => {
+  const { userId } = req.user;
+  const { updatedData } = req.body;
+  try {
+    const user = await getUserById(userId);
+    if (user) {
+      const updatedProfile = await updateProfile(userId, updatedData);
+      if (updatedProfile) {
+        res
+          .status(200)
+          .json({ message: "User Profile Update", profile: updatedProfile });
+      } else {
+        res.status(400).json({ message: "User profile updation failed" });
+      }
+    } else {
+      res.status("Invalid user, Please login again");
+    }
+  } catch (error) {
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
 //routes for following users
 app.post("/user/follow/:followerUserId", verifyAuth, async (req, res) => {
   try {
     const { userId } = req.user;
     const { followerUserId } = req.params;
 
-    const followUser = await followingUser(userId, followerUserId);
-    if (followUser) {
-      res.status(200).json({ message: "Followed successfully" });
+    const updatedUser = await followingUser(userId, followerUserId);
+    if (updatedUser) {
+      res.status(200).json({
+        message: "User Followed",
+        user: updatedUser.user,
+        followUser: updatedUser.followUser,
+      });
     } else {
       res.status(404).json({ message: "Failed to follow the user" });
     }
@@ -192,9 +222,13 @@ app.post("/user/unfollow/:follwerUserId", verifyAuth, async (req, res) => {
     const { userId } = req.user;
     const { follwerUserId } = req.params;
 
-    const unfollowingUser = await unfollowUser(userId, follwerUserId);
-    if (unfollowingUser) {
-      res.status(200).json({ message: "Unfollowed Successfully" });
+    const updatedUser = await unfollowUser(userId, follwerUserId);
+    if (updatedUser) {
+      res.status(200).json({
+        message: "User Unfollowed Successfully",
+        user: updatedUser.user,
+        unfollowUser: updatedUser.unfollowUser,
+      });
     } else {
       res.status(404).json({ message: "Failed to unfollow" });
     }
@@ -220,7 +254,9 @@ app.post(
       };
       const updateAvatar = await changeAvatar(userId, avatar);
       if (updateAvatar) {
-        res.status(200).json({ message: "Avatar updated successfully" });
+        res
+          .status(200)
+          .json({ message: "Avatar updated successfully", user: updateAvatar });
       } else {
         res.status(404).json({ message: "Failed to update Avatar" });
       }
@@ -366,7 +402,7 @@ app.delete("/user/post/:postId", verifyAuth, async (req, res) => {
     if (deletedPost) {
       res
         .status(200)
-        .json({ message: "Post deleted successfully", deletedPost });
+        .json({ message: "Post deleted successfully", post: deletedPost });
     } else {
       res.status(404).json({ message: "Failed to delete post" });
     }
@@ -411,11 +447,12 @@ app.post("/user/bookmark/:postId", verifyAuth, async (req, res) => {
   const { userId } = req.user;
   const { postId } = req.params;
   try {
-    const bookmarks = await addBookmark(userId, postId);
-    if (bookmarks) {
-      res
-        .status(200)
-        .json({ message: "Added to bookmark successfully", bookmarks });
+    const bookmarkPost = await addBookmark(userId, postId);
+    if (bookmarkPost) {
+      res.status(200).json({
+        message: "Added to bookmark successfully",
+        bookmarks: bookmarkPost,
+      });
     } else {
       res.status(404).json;
     }
@@ -430,9 +467,12 @@ app.delete("/user/remove-bookmark/:postId", verifyAuth, async (req, res) => {
     const { userId } = req.user;
     const { postId } = req.params;
 
-    const post = await removeBookmark(userId, postId);
-    if (post) {
-      res.status(200).json({ message: "Bookmark removed successfully.", post });
+    const removedBookmark = await removeBookmark(userId, postId);
+    if (removedBookmark) {
+      res.status(200).json({
+        message: "Bookmark removed successfully.",
+        bookmark: removedBookmark,
+      });
     } else {
       res.status(404).json({ message: "Failed to remove the Bookmark." });
     }
@@ -458,7 +498,7 @@ app.get("/user/bookmarks", verifyAuth, async (req, res) => {
 });
 
 //add comment routes
-app.post("/user/comment/:postId", verifyAuth, async (req, res) => {
+app.post("/user/post/comment/:postId", verifyAuth, async (req, res) => {
   try {
     const { userId } = req.user;
     const { postId } = req.params;
@@ -467,7 +507,7 @@ app.post("/user/comment/:postId", verifyAuth, async (req, res) => {
     if (updatedPost) {
       res.status(200).json({
         message: "Comment added Successfully",
-        updatedPost: updatedPost,
+        post: updatedPost,
       });
     } else {
       res.status(404).json({ message: "Failed to add comment" });
@@ -479,7 +519,7 @@ app.post("/user/comment/:postId", verifyAuth, async (req, res) => {
 
 //remove comment
 app.delete(
-  "/user/:postId/delete-comment/:commentId",
+  "/user/post/:postId/delete-comment/:commentId",
   verifyAuth,
   async (req, res) => {
     try {
@@ -488,9 +528,10 @@ app.delete(
       const { commentId } = req.params;
       const deletedComment = await removeComment(userId, postId, commentId);
       if (deletedComment) {
-        res
-          .status(200)
-          .json({ message: "Comment deleted successfully", deletedComment });
+        res.status(200).json({
+          message: "Comment deleted successfully",
+          post: deletedComment,
+        });
       } else {
         res.status(404).json({ message: "Failed to delete comment" });
       }

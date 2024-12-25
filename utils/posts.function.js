@@ -10,7 +10,7 @@ const addPost = async (userId, postData) => {
       const post = {
         caption: postData.caption,
         media: postData.media,
-        author: user._id,
+        author: user,
         // author: postData.author,
       };
 
@@ -75,7 +75,7 @@ const updatePostById = async (postId, dataToUpdate, userId) => {
     const updatePost = await Post.findByIdAndUpdate(postId, dataToUpdate, {
       new: true,
     })
-      .populate("author", "username media")
+      .populate("author", "username media image")
       .populate("likes", "username")
       .populate("comments.commentedBy", "username media");
     return updatePost;
@@ -166,10 +166,10 @@ const addComment = async (userId, postId, commentData) => {
       throw new Error("Post or user not found");
     }
 
+    console.log("commentData received:", commentData);
     const newComment = {
-      commentText: commentData.newComment,
-      commentedBy: user._id,
-      commentAt: Date.now(),
+      comment: commentData.newComment,
+      commentedBy: user,
     };
     post.comments.push(newComment);
     await post.save();
@@ -200,8 +200,8 @@ const removeComment = async (userId, postId, commentId) => {
 
       post.comments = updatedComments;
       await post.save();
-      return { updatedComments: post.comments };
-      // return post;
+      // return { updatedComments: post.comments };
+      return post;
     } else {
       console.log("No authorized to delete the comment");
     }

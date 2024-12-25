@@ -110,14 +110,13 @@ const getAllBookmarks = async (userId) => {
 const followingUser = async (userId, followerUserId) => {
   try {
     const user = await User.findById(userId)
-      .populate("followers", "username")
-      .populate("following", "username")
+      .populate("followers", "username image")
+      .populate("following", "username image")
       .populate("posts");
 
-    const followUser = await user
-      .findById(followerUserId)
-      .populate("followers", "username")
-      .populate("following", "username")
+    const followUser = await User.findById(followerUserId)
+      .populate("followers", "username image")
+      .populate("following", "username  image")
       .populate("posts");
 
     user.following.push(followUser);
@@ -171,6 +170,22 @@ const changeAvatar = async (userId, avatar) => {
   }
 };
 
+const updateProfile = async (userId, updatedData) => {
+  try {
+    const updatedProfile = await User.findByIdAndUpdate(userId, updatedData, {
+      new: true,
+    })
+      .populate("followers", "username")
+      .populate("following", "username")
+      .populate("posts");
+
+    await updatedProfile.save();
+    return updatedProfile;
+  } catch (error) {
+    console.error("Error updating profile:-", error);
+  }
+};
+
 module.exports = {
   signUp,
   changeAvatar,
@@ -182,4 +197,5 @@ module.exports = {
   getAllUser,
   getUserById,
   login,
+  updateProfile,
 };
