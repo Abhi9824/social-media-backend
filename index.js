@@ -291,7 +291,6 @@ app.post(
       const { userId } = req.user;
       const { caption } = req.body;
       const files = req.files; // For multiple files, multer provides req.files
-
       if (!files || files.length === 0) {
         return res.status(400).json({ message: "No files uploaded" });
       }
