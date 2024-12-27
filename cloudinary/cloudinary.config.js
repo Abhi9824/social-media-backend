@@ -19,7 +19,7 @@ const uploadOnCloudinary = async (localFilePath, resourceType = "auto") => {
           : "social_media/posts/images",
     });
     // await fs.unlinkSync(localFilePath);
-    return response;
+    // return response;
   } catch (error) {
     console.error("Error during upload:", error);
     // try {
@@ -31,7 +31,12 @@ const uploadOnCloudinary = async (localFilePath, resourceType = "auto") => {
     //   console.error("Error unlinking file:", unlinkError);
     // }
     throw error;
+  } finally {
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
   }
+  return response;
 };
 
 module.exports = { uploadOnCloudinary };
