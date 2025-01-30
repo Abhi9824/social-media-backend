@@ -95,9 +95,10 @@ app.post("/user/login", async (req, res) => {
 
   try {
     const user = await User.findOne({ email: email })
-      .populate("followers", "username")
-      .populate("following", "username")
-      .populate("posts");
+      .populate("followers", "username name")
+      .populate("following", "username name")
+      .populate("posts")
+      .populate("image");
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -217,7 +218,6 @@ app.post("/user/unfollow/:follwerUserId", verifyAuth, async (req, res) => {
   }
 });
 
-//change avatar
 app.post(
   "/user/change-avatar",
   verifyAuth,
@@ -227,26 +227,33 @@ app.post(
       const { userId } = req.user;
       const file = req.file;
 
+      if (!file) {
+        return res.status(400).json({ message: "No image uploaded" });
+      }
+
       const avatar = {
-        public_id: file.public_id,
-        url: file.secure_url,
+        public_id: file.filename,
+        url: file.path,
       };
+
       const updateAvatar = await changeAvatar(userId, avatar);
+
       if (updateAvatar) {
-        res
-          .status(200)
-          .json({ message: "Avatar updated successfully", user: updateAvatar });
+        res.status(200).json({
+          message: "Avatar updated successfully",
+          user: updateAvatar,
+        });
       } else {
         res.status(404).json({ message: "Failed to update Avatar" });
       }
     } catch (error) {
-      res.status(500).json({ error: "Internal Server Issue", error });
+      console.error("Error updating avatar:", error);
+      res.status(500).json({ error: "Internal Server Issue" });
     }
   }
 );
 
 //routes apis for post
-
 //get all post
 app.get("/user/post", verifyAuth, async (req, res) => {
   try {
